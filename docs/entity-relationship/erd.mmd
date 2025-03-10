@@ -1,0 +1,157 @@
+erDiagram
+    User ||--o{ UserSetting : has
+    User ||--o{ Address : has
+    User ||--o{ Review : writes
+    User ||--o{ FavoriteItem : adds
+    User ||--o{ CartItem : adds
+    User ||--o{ Order : places
+    User ||--o{ PaymentMethod : uses
+    User ||--o{ Phone : has
+
+    Product ||--o{ Review : has
+    Product ||--o{ FavoriteItem : added-to
+    Product ||--o{ CartItem : added-to
+    Product ||--o{ OrderItem : part-of
+    Product ||--o{ Image : has
+    Product }|--|| Category : belongs-to
+    Product }|--|| ProductUnit : uses
+
+    Order ||--o{ OrderItem : contains
+    Order ||--o{ OrderStatus : has
+    Order }|--|| ShippingMethod : uses
+    Order }|--|| PaymentMethod : uses
+    Order }|--|| Address : has
+
+    Image ||--o{ Product : belongs-to
+    Image ||--o{ Category : belongs-to
+    Image ||--o{ User : belongs-to
+
+    Phone ||--o{ User : belongs-to
+    
+
+    User {
+        string id
+        string name
+        string email
+        string password_hash
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    UserSetting {
+        string id
+        string user_id
+        boolean enable_email_notification
+        boolean enable_order_notification
+        boolean enable_general_notification
+    }
+
+    FavoriteItem {
+        string id
+        string product_id
+        string user_id
+    }
+
+    Review {
+        string id
+        string product_id
+        string user_id
+        float rating
+        string description
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    Product {
+        string id
+        string category_id
+        string product_unit_id
+        string name
+        string description
+        float price
+        int quantity_stock
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ProductUnit {
+        string id
+        string name
+    }
+
+    Category {
+        string id
+        string name
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    Address {
+        string id
+        string user_id
+        boolean default
+        string recipient_name
+        string address
+        string city
+        int zip_code
+        string country
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PaymentMethod {
+        string id
+        string user_id
+        string type
+    }
+
+    ShippingMethod {
+        string id
+        string name
+        string description
+        float price
+    }
+
+    CartItem {
+        string id
+        string user_id
+        string product_id
+        int quantity
+    }
+
+    Image {
+        string id
+        string owner_id
+        string owner_table
+        string url
+    }
+
+    Order {
+        string id
+        string user_id
+        string shipping_method_id
+        string payment_method_id
+        string address_id
+        float total
+    }
+
+    OrderItem {
+        string id
+        string order_id
+        string product_id
+        int quantity
+    }
+
+    OrderStatus {
+        string id
+        string order_id
+        int status
+        timestamp created_at
+    }
+
+    Phone {
+        string id
+        string owner_id
+        string owner_table
+        string phone
+    }

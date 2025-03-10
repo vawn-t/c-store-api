@@ -1,0 +1,40 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant APIServer
+    participant OTPService
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case
+        User->>C-Store: Click "Resend a new code" button
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/authentication/resend-activate-otp/<br>Header: { authorization }<br>Payload: { phone }
+        activate APIServer
+        APIServer->>OTPService: Request service send code<br>to user's phone number via SMS
+        activate OTPService
+        OTPService-->>APIServer: Response success
+        deactivate OTPService
+
+        par Asynchronous - SMS OTP Verification
+            OTPService-->>User: Send OTP SMS
+        end
+
+        APIServer-->>C-Store: [*] OTP sent successful<br>Response<br>Method: POST<br>Endpoint: /api/v1/authentication/resend-activate-otp/<br>Status: 200<br>Payload: {}
+        deactivate APIServer
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case
+        User->>C-Store: Click "Resend a new code" button
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/authentication/resend-activate-otp/<br>Header: { authorization }<br>Payload: { phone }
+        activate APIServer
+        APIServer->>OTPService: Request service send code<br>to user's phone number via SMS
+        activate OTPService
+        OTPService-->>APIServer: Response failure
+        deactivate OTPService
+        APIServer-->>C-Store: [*] OTP sent failure<br>Response<br>Method: POST<br>Endpoint: /api/v1/authentication/resend-activate-otp/<br>Status: 400<br>Payload: {}
+        deactivate APIServer
+        deactivate C-Store
+    end

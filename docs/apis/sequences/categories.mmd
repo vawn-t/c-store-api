@@ -1,0 +1,92 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant APIServer
+    participant CloudStorageService
+    participant Database
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Home Screen)
+        User->>C-Store: User access to home screen
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: GET<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: {}
+        activate APIServer
+        APIServer->>Database: Query "Category" table joined with "Image" table<br>by "categoryId" attribute
+        activate Database
+        Database-->>APIServer: Return all categories included image
+        deactivate Database
+        APIServer-->>C-Store: [*] Get all categories success<br>Response<br>Method: GET<br>Endpoint: /api/v1/catalogue/categories/<br>Status: 200<br>Payload: { categories }
+        deactivate APIServer
+        C-Store-->>User: Render categories list to screen
+        deactivate C-Store
+    end
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Admin Screen)
+        User->>C-Store: User access to admin screen
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
+        activate APIServer
+        APIServer->>Database: Query "Category" table by "name" attribute
+        activate Database
+        Database-->>APIServer: Cannot found record
+        deactivate Database
+
+        par Asynchronous - Upload Image to Cloud Storage
+            APIServer->>CloudStorageService: Send received image from client<br>to cloud storage service
+            activate CloudStorageService
+            CloudStorageService-->>APIServer: Response success & return uploaded image URL
+            deactivate CloudStorageService
+        end
+
+        APIServer->>Database: Update new URL to "Image" table<br>by "categoryId" attribute
+        activate Database
+        Database-->>APIServer: Response success
+        APIServer->>Database: Create new category with inputted "name" & responsed "image"
+        Database-->>APIServer: Return created category
+        deactivate Database
+        APIServer-->>C-Store: [*] Created new category success<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Status: 200<br>Payload: { id, name, image, createdAt, updatedAt }
+        deactivate APIServer
+        C-Store-->>User: Render categories list to screen
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 1
+        User->>C-Store: User access to admin screen
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
+        activate APIServer
+        APIServer->>Database: Query "Category" table by "name" attribute
+        activate Database
+        Database-->>APIServer: Found record
+        deactivate Database
+        APIServer-->>C-Store: [*] Entered "name" is already registered<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Status: 409<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: Name already registered
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 2
+        User->>C-Store: User access to admin screen
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
+        activate APIServer
+        APIServer-->>C-Store: [*] Uploaded file with unsupported media type<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Status: 415<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: The image uploaded with wrong media type
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 3
+        User->>C-Store: User access to admin screen
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
+        activate APIServer
+        APIServer-->>C-Store: [*] Uploaded file too large<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Status: 413<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: The image uploaded with too large size
+        deactivate C-Store
+    end

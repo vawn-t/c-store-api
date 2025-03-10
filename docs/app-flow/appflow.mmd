@@ -1,0 +1,28 @@
+flowchart TD
+    A[Visit Sign-Up Page] --> B[Enter Details]
+    B --> C{Validate Input}
+    C -- Valid --> D{Check for Existing User}
+    C -- Invalid --> B
+    D -- New User --> E[Send OTP]
+    D -- Existing User --> F[Prompt to Login or Reset Password]
+    E --> G[Enter OTP]
+    G --> H{Verify OTP}
+    H -- Valid --> I[Create User Account]
+    H -- Invalid --> G
+    I --> J[Redirect to Login]
+    J --> K[User Logs In]
+    K --> L[Browse Products]
+    L --> M[View Product Details]
+    M --> N{Add to Cart or Favorites?}
+    N -- Add to Cart --> O[Update Cart]
+    N -- Add to Favorites --> P[Update Favorites]
+    O --> Q[View Cart]
+    Q --> R{Proceed to Checkout?}
+    R -- Yes --> S[Select Shipping Method]
+    S --> T[Select Payment Method]
+    T --> U[Enter Shipping Address]
+    U --> V[Confirm Order]
+    V --> W[Create Order]
+    W --> X[Update Inventory]
+    X --> Y[Send Order Confirmation]
+    Y --> Z[End]

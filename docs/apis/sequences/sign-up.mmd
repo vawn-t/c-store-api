@@ -1,0 +1,103 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant APIServer
+    participant OTPService
+    participant Database
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Step 1: Sign Up Account)
+        User->>C-Store: Enter Email & Password
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Payload: { email, password, phone }
+        activate APIServer
+        APIServer->>Database: Query "User" table by "email" attribute
+        activate Database
+        Database-->>APIServer: Cannot found record
+        APIServer->>Database: Query "Phone of User" table by "phone" attribute
+        Database-->>APIServer: Cannot found record
+        APIServer->>Database: Create new user with status is "verifying"
+        Database-->>APIServer: Response success
+        APIServer->>Database: Add default notification setting for created user at "User Setting" table
+        Database-->>APIServer: Response success
+        deactivate Database
+        APIServer->>OTPService: Request service send code<br>to user's phone number via SMS
+        activate OTPService
+        OTPService-->>APIServer: Response success
+
+        par Asynchronous - SMS OTP Verification
+            OTPService-->>User: Send OTP SMS
+        end
+
+        deactivate OTPService
+        APIServer-->>C-Store: [*] Account created success with status "verifying"<br>Response<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Status: 201<br>Payload: { token }
+        deactivate APIServer
+        C-Store->>User: Redirect to Verify OTP screen
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 1
+        User->>C-Store: Enter Email & Password
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Payload: { email, password, phone }
+        activate APIServer
+        APIServer->>Database: Query "User" table by received "email" attribute
+        activate Database
+        Database-->>APIServer: Found record
+        deactivate Database
+        APIServer-->>C-Store: [*] Entered "email" is already registered<br>Response<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Status: 409<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: Email already registered
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 2
+        User->>C-Store: Enter Email & Password
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Payload: { email, password, phone }
+        activate APIServer
+        APIServer->>Database: Query "User" table by "email" attribute
+        activate Database
+        Database-->>APIServer: Cannot found record
+        APIServer->>Database: Query "Phone of User" table by "phone" attribute
+        Database-->>APIServer: Found record
+        deactivate Database
+        APIServer-->>C-Store: [*] Entered "phone" is already registered<br>Response<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Status: 409<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: Phone already registered
+        deactivate C-Store
+    end
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Step 2: Verify Phone Number)
+        User->>C-Store: Enter OTP code
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/activate-account<br>Header: { authorization }<br>Payload: { otp }
+        activate APIServer
+        APIServer->>OTPService: Request to verify entered OTP
+        activate OTPService
+        OTPService-->>APIServer: Response success (OTP correct)
+        deactivate OTPService
+        APIServer-->>C-Store: [*] Account is updated with status "activated"<br>Response<br>Method: POST<br>Endpoint: /api/v1/authentication/activate-account<br>Status: 200<br>Payload: {}
+        deactivate APIServer
+        C-Store->>User: Redirect to Home screen
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case
+        User->>C-Store: Enter OTP code
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/activate-account<br>Header: { authorization }<br>Payload: { otp }
+        activate APIServer
+        APIServer->>OTPService: Request to verify entered OTP
+        activate OTPService
+        OTPService-->>APIServer: Response failure (OTP incorrect)
+        deactivate OTPService
+        APIServer-->>C-Store: [*] Entered OTP is incorrect<br>Response<br>Method: POST<br>Endpoint: /api/v1/authentication/activate-account<br>Status: 400<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: Incorrect OTP code
+        deactivate C-Store
+    end

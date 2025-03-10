@@ -1,0 +1,53 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant APIServer
+    participant Database
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case
+        User->>C-Store: Enter Email & Password
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-in/<br>Payload: { email, password }
+        activate APIServer
+        APIServer->>Database: Query "User" table<br>by "email" attribute
+        activate Database
+        Database-->>APIServer: Return user
+        deactivate Database
+        APIServer-->>C-Store: [*] Email and Password is correct<br>Response<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-in/<br>Status: 200<br>Payload: { token }
+        deactivate APIServer
+        C-Store->>User: Redirect screen
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 1
+        User->>C-Store: Enter Email & Password
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-in/<br>Payload: { email, password }
+        activate APIServer
+        APIServer->>Database: Query "User" table<br>by "email" attribute
+        activate Database
+        Database-->>APIServer: Return user
+        deactivate Database
+        APIServer-->>C-Store: [*] Password not match<br>Response<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-in/<br>Status: 400<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: The username/password combination is incorrect.
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 2
+        User->>C-Store: Enter Email & Password
+        activate C-Store
+        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-in/<br>Payload: { email, password }
+        activate APIServer
+        APIServer->>Database: Query "User" table<br>by "email" attribute
+        activate Database
+        Database-->>APIServer: Cannot find by "email" attribute
+        deactivate Database
+        APIServer-->>C-Store: [*] Email is not registered<br>Response<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-in/<br>Status: 400<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: The username/password combination is incorrect.
+        deactivate C-Store
+    end
