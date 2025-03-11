@@ -1,0 +1,109 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant APIServer
+    participant Database
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Get User's Addresses)
+        User->>C-Store: User access to user's addresses screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: GET<br>Endpoint: /api/v1/users/:userId/addresses/<br>Header: { authorization }<br>Payload: {}
+        activate APIServer
+        APIServer->>Database: Query "Address" table joined with "Phone" table<br>by "phoneId" attribute
+        activate Database
+        Database-->>APIServer: Return addresses included phone of current user
+        deactivate Database
+        APIServer-->>C-Store: [*] Get user's addresses success<br>Response<br>Method: GET<br>Endpoint: /api/v1/users/:userId/addresses/<br>Status: 200<br>Payload: { addresses }
+        deactivate APIServer
+        C-Store-->>User: Render user's addresses to screen
+        deactivate C-Store
+    end
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Create User's Address)
+        User->>C-Store: User access to user's addresses screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/users/:userId/addresses/<br>Header: { authorization }<br>Payload: { name, address, city, zipCode, country, phone, setDefault }
+        activate APIServer
+        APIServer->>Database: Create new user's address with received value
+        activate Database
+        Database-->>APIServer: Return address
+        deactivate Database
+        APIServer-->>C-Store: [*] Create new user's address success<br>Response<br>Method: POST<br>Endpoint: /api/v1/users/:userId/addresses/<br>Status: 200<br>Payload: { id, name, address, city, zipCode, country, phone, setDefault, createdAt, updatedAt }
+        deactivate APIServer
+        C-Store-->>User: Render new user's address to screen
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 1 (Create User's Address)
+        User->>C-Store: User access to user's addresses screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/users/:userId/addresses/<br>Header: { authorization }<br>Payload: { name, address, city, zipCode, country, phone, setDefault }
+        activate APIServer
+        APIServer-->>C-Store: [*] User send wrong data format<br>Response<br>Method: POST<br>Endpoint: /api/v1/users/:userId/addresses/<br>Status: 400<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: This is not a valid phone format
+        deactivate C-Store
+    end
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Update User's Address)
+        User->>C-Store: User access to user's addresses screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: PATCH<br>Endpoint: /api/v1/users/:userId/addresses/:addressId/<br>Header: { authorization }<br>Payload: { name, address, city, zipCode, country, phone, setDefault }
+        activate APIServer
+        APIServer->>Database: Update new user's address with received value
+        activate Database
+        Database-->>APIServer: Return address
+        deactivate Database
+        APIServer-->>C-Store: [*] Update new user's address success<br>Response<br>Method: PATCH<br>Endpoint: /api/v1/users/:userId/addresses/:addressId/<br>Status: 200<br>Payload: { id, name, address, city, zipCode, country, phone, setDefault, createdAt, updatedAt }
+        deactivate APIServer
+        C-Store-->>User: Render new user's address to screen
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 1 (Update User's Address)
+        User->>C-Store: User access to user's addresses screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: PATCH<br>Endpoint: /api/v1/users/:userId/addresses/:addressId/<br>Header: { authorization }<br>Payload: { name, address, city, zipCode, country, phone, setDefault }
+        activate APIServer
+        APIServer-->>C-Store: [*] User send wrong phone format<br>Response<br>Method: PATCH<br>Endpoint: /api/v1/users/:userId/addresses/:addressId/<br>Status: 400<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: This is not a valid phone format
+        deactivate C-Store
+    end
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Delete User's Address)
+        User->>C-Store: User access to user's addresses screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: DELETE<br>Endpoint: /api/v1/users/:userId/addresses/:addressId/<br>Header: { authorization }<br>Payload: {}
+        activate APIServer
+        APIServer->>Database: Delete user's address in "Address" table by "id" attribute
+        activate Database
+        Database-->>APIServer: Response success
+        deactivate Database
+        APIServer-->>C-Store: [*] Remove user's address success<br>Response<br>Method: DELETE<br>Endpoint: /api/v1/users/:userId/addresses/:addressId/<br>Status: 200<br>Payload: {}
+        deactivate APIServer
+        C-Store-->>User: Remove address on screen
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 1 (Delete User's Address)
+        User->>C-Store: User access to user's addresses screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: DELETE<br>Endpoint: /api/v1/users/:userId/addresses/:addressId/<br>Header: { authorization }<br>Payload: {}
+        activate APIServer
+        APIServer->>Database: Delete user's address in "Address" table by "id" attribute
+        activate Database
+        Database-->>APIServer: Response fail
+        deactivate Database
+        APIServer-->>C-Store: [*] Remove user's address fail<br>Response<br>Method: DELETE<br>Endpoint: /api/v1/users/:userId/addresses/:addressId/<br>Status: 404<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Render update to screen
+        deactivate C-Store
+    end

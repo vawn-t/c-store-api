@@ -1,0 +1,79 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant API Server
+    participant Database
+
+    %% GET user profile
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - GET user profile
+        User->>C-Store: User access to update profile screen
+        activate C-Store
+        C-Store->>API Server: Request Method: GET<br>Endpoint: /api/v1/users/:userId/profile/<br>Header: { authorization }<br>Payload: {}
+        activate API Server
+        API Server->>Database: Query "User" table joined with "Phone" & "Image" table by "userId" attribute
+        activate Database
+        Database-->>API Server: Return user included image and phone
+        deactivate Database
+        API Server-->>C-Store: [*] Get user's profile success<br>Response<br>Method: GET<br>Endpoint: /api/v1/users/:userId/profile/<br>Status: 200<br>Payload: { email, image, name, phone }
+        deactivate API Server
+        C-Store-->>User: Render user profile to screen
+        deactivate C-Store
+    end
+
+    %% UPDATE user profile - success
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - UPDATE user profile
+        User->>C-Store: User access to update user profile screen
+        activate C-Store
+        C-Store->>API Server: Request Method: PATCH<br>Endpoint: /api/v1/users/:userId/profile/<br>Header: { authorization }<br>Payload: { email, name, phone }
+        activate API Server
+        API Server->>Database: Query "User" table by received "email" attribute
+        activate Database
+        Database-->>API Server: Cannot found record
+        API Server->>Database: Query "Phone of User" table by "phone" attribute
+        Database-->>API Server: Cannot found record
+        API Server->>Database: Update user's profile with received value
+        Database-->>API Server: Return user
+        deactivate Database
+        API Server-->>C-Store: [*] Update user's profile success<br>Response<br>Method: PATCH<br>Endpoint: /api/v1/users/:userId/profile/<br>Status: 200<br>Payload: { email, name, phone }
+        deactivate API Server
+        C-Store-->>User: Redirect to Setting screen
+        deactivate C-Store
+    end
+
+    %% UPDATE user profile - email exists failure
+    rect rgb(255, 0, 0, 0.1)
+        Note right of User: Failure case 1 - Email already exists
+        User->>C-Store: User access to update user profile screen
+        activate C-Store
+        C-Store->>API Server: Request Method: PATCH<br>Endpoint: /api/v1/users/:userId/profile/<br>Header: { authorization }<br>Payload: { email, name, phone }
+        activate API Server
+        API Server->>Database: Query "User" table by received "email" attribute
+        activate Database
+        Database-->>API Server: Found record
+        deactivate Database
+        API Server-->>C-Store: [*] Email is already registered by another user<br>Response<br>Method: PATCH<br>Endpoint: /api/v1/users/:userId/profile/<br>Status: 409<br>Payload: { errors }
+        deactivate API Server
+        C-Store-->>User: Display Error Message<br>Message: Email already registered
+        deactivate C-Store
+    end
+
+    %% UPDATE user profile - phone exists failure
+    rect rgb(255, 0, 0, 0.1)
+        Note right of User: Failure case 2 - Phone already exists
+        User->>C-Store: User access to update user profile screen
+        activate C-Store
+        C-Store->>API Server: Request Method: PATCH<br>Endpoint: /api/v1/users/:userId/profile/<br>Header: { authorization }<br>Payload: { email, name, phone }
+        activate API Server
+        API Server->>Database: Query "User" table by received "email" attribute
+        activate Database
+        Database-->>API Server: Cannot found record
+        API Server->>Database: Query "Phone of User" table by "phone" attribute
+        Database-->>API Server: Found record
+        deactivate Database
+        API Server-->>C-Store: [*] Phone number is already registered by another<br>Response<br>Method: PATCH<br>Endpoint: /api/v1/users/:userId/profile/<br>Status: 409<br>Payload: { errors }
+        deactivate API Server
+        C-Store-->>User: Display Error Message<br>Message: Phone number is already registered by another
+        deactivate C-Store
+    end

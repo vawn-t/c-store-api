@@ -1,0 +1,60 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant API Server
+    participant Cloud Storage Service
+    participant Database
+
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case
+        User->>C-Store: User click "update avatar" button at setting screen
+        activate C-Store
+        C-Store->>API Server: Request Method: PATCH<br>Endpoint: /api/v1/users/:userId/avatar/<br>Header: { authorization }<br>Payload: { image }
+        activate API Server
+        
+        par Asynchronous - Upload Image to Cloud Storage
+            API Server->>Cloud Storage Service: Send received image from client<br>to cloud storage service
+            activate Cloud Storage Service
+            Cloud Storage Service-->>API Server: Response success & return uploaded image URL
+            deactivate Cloud Storage Service
+        end
+        
+        API Server->>Database: Update new URL to "Image" table by "userId" attribute
+        activate Database
+        Database-->>API Server: Response success
+        deactivate Database
+        
+        API Server-->>C-Store: [*] Update user's avatar success<br>Response<br>Method: PATCH<br>Endpoint: /api/v1/users/:userId/avatar/<br>Status: 200<br>Payload: { image }
+        deactivate API Server
+        
+        C-Store-->>User: Render updated avatar to setting screen
+        deactivate C-Store
+    end
+    
+    rect rgb(255, 0, 0, 0.1)
+        Note right of User: Failure case 1
+        User->>C-Store: User click "update avatar" button at setting screen
+        activate C-Store
+        C-Store->>API Server: Request Method: PATCH<br>Endpoint: /api/v1/users/:userId/avatar/<br>Header: { authorization }<br>Payload: { image }
+        activate API Server
+        
+        API Server-->>C-Store: [*] Uploaded file with unsupported media type<br>Response<br>Method: PATCH<br>Endpoint: /api/v1/users/:userId/avatar/<br>Status: 415<br>Payload: { errors }
+        deactivate API Server
+        
+        C-Store-->>User: Display Error Message<br>Message: The image uploaded with wrong media type
+        deactivate C-Store
+    end
+    
+    rect rgb(255, 0, 0, 0.1)
+        Note right of User: Failure case 2
+        User->>C-Store: User click "update avatar" button at setting screen
+        activate C-Store
+        C-Store->>API Server: Request Method: PATCH<br>Endpoint: /api/v1/users/:userId/avatar/<br>Header: { authorization }<br>Payload: { image }
+        activate API Server
+        
+        API Server-->>C-Store: [*] Uploaded file too large<br>Response<br>Method: PATCH<br>Endpoint: /api/v1/users/:userId/avatar/<br>Status: 413<br>Payload: { errors }
+        deactivate API Server
+        
+        C-Store-->>User: Display Error Message<br>Message: The image uploaded with too large size
+        deactivate C-Store
+    end

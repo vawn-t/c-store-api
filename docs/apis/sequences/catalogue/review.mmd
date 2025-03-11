@@ -1,0 +1,69 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant APIServer
+    participant Database
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Get Product Reviews)
+        User->>C-Store: User access to product's reviews screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: GET<br>Endpoint: /api/v1/catalogue/products/:productId/reviews/<br>Header: { authorization }<br>Payload: {}
+        activate APIServer
+        APIServer->>Database: Query "Review" table joined with "Image" & "User" tables<br>by "productId" and "userId" attribute
+        activate Database
+        Database-->>APIServer: Return reviews list with user's image
+        deactivate Database
+        APIServer-->>C-Store: [*] Get product's reviews success<br>Response<br>Method: GET<br>Endpoint: /api/v1/catalogue/products/:productId/reviews/<br>Status: 200<br>Payload: { reviews }
+        deactivate APIServer
+        C-Store-->>User: Render product's reviews to screen
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case (Get Product Reviews)
+        User->>C-Store: User access to product's reviews screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: GET<br>Endpoint: /api/v1/catalogue/products/:productId/reviews/<br>Header: { authorization }<br>Payload: {}
+        activate APIServer
+        APIServer->>Database: Query "Review" table joined with "Image" & "User" tables<br>by "productId" and "userId" attribute
+        activate Database
+        Database-->>APIServer: Can not find "productId"
+        deactivate Database
+        APIServer-->>C-Store: [*] Endpoint is wrong or product deleted<br>Response<br>Method: GET<br>Endpoint: /api/v1/catalogue/products/:productId/reviews/<br>Status: 404<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Redirect to 404 not found screen
+        deactivate C-Store
+    end
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Add Review)
+        User->>C-Store: User access to add review screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/products/:productId/reviews/<br>Header: { authorization }<br>Payload: { rating, description }
+        activate APIServer
+        APIServer->>Database: Create new review with inputted "rating" & "description"
+        activate Database
+        Database-->>APIServer: Return created review
+        deactivate Database
+        APIServer-->>C-Store: [*] Get product's reviews success<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/products/:productId/reviews/<br>Status: 200<br>Payload: { userName, userImage, rating, description, ... }
+        deactivate APIServer
+        C-Store-->>User: Redirect product's reviews to screen
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case (Add Review)
+        User->>C-Store: User access to add review screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/products/:productId/reviews/<br>Header: { authorization }<br>Payload: { rating, description }
+        activate APIServer
+        APIServer->>Database: Query "Review" table joined with "Image" & "User" tables<br>by "productId" and "userId" attribute
+        activate Database
+        Database-->>APIServer: Can not find "productId"
+        deactivate Database
+        APIServer-->>C-Store: [*] Endpoint is wrong or product deleted<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/products/:productId/reviews/<br>Status: 404<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Redirect to 404 not found screen
+        deactivate C-Store
+    end

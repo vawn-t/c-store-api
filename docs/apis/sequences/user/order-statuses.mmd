@@ -1,0 +1,22 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant API Server
+    participant Database
+
+    %% GET order statuses
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - GET order statuses
+        User->>C-Store: User access to order screen
+        activate C-Store
+        C-Store->>API Server: Request Method: GET<br>Endpoint: /api/v1/users/:userId/order-statuses/<br>Header: { authorization }<br>Payload: {}
+        activate API Server
+        API Server->>Database: Query "Order Status" table to get all user's order statuses
+        activate Database
+        Database-->>API Server: Return order statuses
+        deactivate Database
+        API Server-->>C-Store: [*] Get orders success<br>Response<br>Method: GET<br>Endpoint: /api/v1/users/:userId/order-statuses/<br>Status: 200<br>Payload: { orderStatuses }
+        deactivate API Server
+        C-Store-->>User: Render orders to screen
+        deactivate C-Store
+    end

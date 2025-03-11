@@ -1,0 +1,69 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant APIServer
+    participant Database
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Get Shipping Methods)
+        User->>C-Store: User access to shipping method screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: GET<br>Endpoint: /api/v1/shipping-methods/<br>Header: { authorization }<br>Payload: {}
+        activate APIServer
+        APIServer->>Database: Query "Shipping Method" table
+        activate Database
+        Database-->>APIServer: Return shipping methods
+        deactivate Database
+        APIServer-->>C-Store: [*] Get shipping methods success<br>Response<br>Method: GET<br>Endpoint: /api/v1/shipping-methods/<br>Status: 200<br>Payload: { shippingMethods }
+        deactivate APIServer
+        C-Store-->>User: Render shipping methods to screen
+        deactivate C-Store
+    end
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Create Shipping Method)
+        User->>C-Store: User access to shipping method screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/shipping-methods/<br>Header: { authorization }<br>Payload: { name, description, price }
+        activate APIServer
+        APIServer->>Database: Create new user's shipping method with received value
+        activate Database
+        Database-->>APIServer: Return shipping method
+        deactivate Database
+        APIServer-->>C-Store: [*] Create new shipping method success<br>Response<br>Method: POST<br>Endpoint: /api/v1/shipping-methods/<br>Status: 200<br>Payload: { id, name, description, price }
+        deactivate APIServer
+        C-Store-->>User: Render shipping method to screen
+        deactivate C-Store
+    end
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Update Shipping Method)
+        User->>C-Store: User access to shipping method screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: PATCH<br>Endpoint: /api/v1/shipping-methods/:shippingMethodId/<br>Header: { authorization }<br>Payload: { name, description, price }
+        activate APIServer
+        APIServer->>Database: Update shipping method with received value
+        activate Database
+        Database-->>APIServer: Return shipping method
+        deactivate Database
+        APIServer-->>C-Store: [*] Update shipping method success<br>Response<br>Method: PATCH<br>Endpoint: /api/v1/shipping-methods/:shippingMethodId/<br>Status: 200<br>Payload: { id, name, description, price }
+        deactivate APIServer
+        C-Store-->>User: Render shipping method to screen
+        deactivate C-Store
+    end
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Delete Shipping Method)
+        User->>C-Store: User access to shipping method screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: DELETE<br>Endpoint: /api/v1/shipping-methods/:shippingMethodId/<br>Header: { authorization }<br>Payload: {}
+        activate APIServer
+        APIServer->>Database: Delete method in "Shipping Method" table by "id" attribute
+        activate Database
+        Database-->>APIServer: Response success
+        deactivate Database
+        APIServer-->>C-Store: [*] Remove shipping method success<br>Response<br>Method: DELETE<br>Endpoint: /api/v1/shipping-methods/:shippingMethodId/<br>Status: 200<br>Payload: {}
+        deactivate APIServer
+        C-Store-->>User: Render update to screen
+        deactivate C-Store
+    end

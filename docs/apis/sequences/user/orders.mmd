@@ -1,0 +1,86 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant API Server
+    participant Database
+
+    %% GET orders
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - GET orders
+        User->>C-Store: User access to order screen
+        activate C-Store
+        C-Store->>API Server: Request Method: GET<br>Endpoint: /api/v1/users/:userId/orders/<br>Header: { authorization }<br>Payload: {}
+        activate API Server
+        API Server->>Database: Query "Order" table to get all user's Order
+        activate Database
+        Database-->>API Server: Return orders
+        deactivate Database
+        API Server-->>C-Store: [*] Get orders success<br>Response<br>Method: GET<br>Endpoint: /api/v1/users/:userId/orders/<br>Status: 200<br>Payload: { orders }
+        deactivate API Server
+        C-Store-->>User: Render orders to screen
+        deactivate C-Store
+    end
+
+    %% CREATE order
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - CREATE order
+        User->>C-Store: User access to order screen
+        activate C-Store
+        C-Store->>API Server: Request Method: POST<br>Endpoint: /api/v1/users/:userId/orders/<br>Header: { authorization }<br>Payload: { shippingMethodId, addressId, paymentMethodId }
+        activate API Server
+        
+        API Server->>Database: Create new user's order with received value
+        activate Database
+        Database-->>API Server: Return order
+        
+        API Server->>Database: Query "Cart Item" table to get all items of current user
+        Database-->>API Server: Return cart items
+        
+        API Server->>Database: Add queried items to "Order Item" table
+        Database-->>API Server: Response success
+        
+        API Server->>Database: Add "price" of current order to "Order" table
+        Database-->>API Server: Response success
+        
+        API Server->>Database: Remove all cart items of current user on "Cart Item" table
+        Database-->>API Server: Response success
+        
+        API Server->>Database: Add "Order Placed" status to "Order Status" table
+        Database-->>API Server: Return order status
+        
+        API Server->>Database: Query "Order Status" table to get all statuses of current order
+        Database-->>API Server: Return order statuses
+        deactivate Database
+        
+        API Server-->>C-Store: [*] Create new order success<br>Response<br>Method: POST<br>Endpoint: /api/v1/users/:userId/orders/<br>Status: 200<br>Payload: { id, shippingMethodId, addressId, paymentMethodId, total, orderStatuses }
+        deactivate API Server
+        
+        C-Store-->>User: Render order to screen
+        deactivate C-Store
+    end
+
+    %% UPDATE order
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - UPDATE order
+        User->>C-Store: User access to order screen
+        activate C-Store
+        C-Store->>API Server: Request Method: PATCH<br>Endpoint: /api/v1/users/:userId/orders/:orderId/<br>Header: { authorization }<br>Payload: { shippingMethodId, addressId, paymentMethodId }
+        activate API Server
+        
+        API Server->>Database: Update user's payment method, shipping method or address at "Order" table
+        activate Database
+        Database-->>API Server: Return order
+        
+        API Server->>Database: Add new updated status to "Order Status" table
+        Database-->>API Server: Response success
+        
+        API Server->>Database: Query "Order Status" table to get all statuses of current order
+        Database-->>API Server: Return order statuses
+        deactivate Database
+        
+        API Server-->>C-Store: [*] Update order success<br>Response<br>Method: PATCH<br>Endpoint: /api/v1/users/:userId/orders/:orderId/<br>Status: 200<br>Payload: { id, shippingMethodId, addressId, paymentMethodId, total, orderStatuses }
+        deactivate API Server
+        
+        C-Store-->>User: Render update to screen
+        deactivate C-Store
+    end

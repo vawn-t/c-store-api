@@ -12,14 +12,14 @@
 
 # What is JWT (JSON Web Token)?
 
-![JWT workflow](./assets/jwt-workflow.png)
+![JWT workflow](../assets/jwt-workflow.png)
 
 - JWT, or JSON Web Token, is an open standard used to share information between two parties securely — a client and a server. In most cases, it’s an encoded JSON containing a set of claims and a signature. It’s usually used in the context of other authentication mechanisms like OAuth, OpenID to share user-related information. It’s also a popular way to authenticate/authorize users in a microservice architecture.
 - JWT authentication is a token-based stateless authentication mechanism. It is popularly used as a client-side-based stateless session, this means the server doesn’t have to completely rely on a data store (or) database to save session information.
 
 ## Structure of JWT
 
-![JWT workflow](./assets/jwt-structure.png)
+![JWT workflow](../assets/jwt-structure.png)
 
 - JWT structure is divided into three parts: header, payload, signature & is separated from each other by dot (.), and will follow the below structure:
   - **Header**

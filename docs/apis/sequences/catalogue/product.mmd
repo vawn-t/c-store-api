@@ -1,0 +1,132 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant APIServer
+    participant CloudStorageService
+    participant Database
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Get Products)
+        User->>C-Store: User access to home screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: GET<br>Endpoint: /api/v1/catalogue/products/<br>Header: { authorization }<br>Payload: {}
+        activate APIServer
+        APIServer->>Database: Query "Product" table joined with "Image" table<br>by "productId" attribute
+        activate Database
+        Database-->>APIServer: Return all products included image
+        deactivate Database
+        APIServer-->>C-Store: [*] Get all products success<br>Response<br>Method: GET<br>Endpoint: /api/v1/catalogue/products/<br>Status: 200<br>Payload: { products }
+        deactivate APIServer
+        C-Store-->>User: Render products list to screen
+        deactivate C-Store
+    end
+
+    rect rgba(0, 128, 0, 0.1)
+        note right of User: Successful Case (Create Product)
+        User->>C-Store: User access to admin screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Header: { authorization }<br>Payload: { categoryId, productUnitId, name, price, description, quantityStock, images }
+        activate APIServer
+        APIServer->>Database: Query "Product" table by "name" attribute
+        activate Database
+        Database-->>APIServer: Cannot found record
+        APIServer->>Database: Query "Category" table by "categoryId" attribute
+        Database-->>APIServer: Found record
+        APIServer->>Database: Query "Product Unit" table by "productUnitId" attribute
+        Database-->>APIServer: Found record
+        deactivate Database
+
+        par Asynchronous - Upload Image to Cloud Storage
+            APIServer->>CloudStorageService: Send received images from client<br>to cloud storage service
+            activate CloudStorageService
+            CloudStorageService-->>APIServer: Response success & return uploaded image URLs
+            deactivate CloudStorageService
+        end
+
+        APIServer->>Database: Create new product with inputted values
+        activate Database
+        Database-->>APIServer: Return created product
+        deactivate Database
+        APIServer-->>C-Store: [*] Created new product success<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Status: 200<br>Payload: { id, categoryId, productUnitId, name, price, description, quantityStock, images, createdAt, updatedAt }
+        deactivate APIServer
+        C-Store-->>User: Render products list to screen
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 1
+        User->>C-Store: User access to admin screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Header: { authorization }<br>Payload: { categoryId, productUnitId, name, price, description, quantityStock, images }
+        activate APIServer
+        APIServer-->>C-Store: [*] Uploaded file with unsupported media type<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Status: 415<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: The image uploaded with wrong media type
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 2
+        User->>C-Store: User access to admin screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Header: { authorization }<br>Payload: { categoryId, productUnitId, name, price, description, quantityStock, images }
+        activate APIServer
+        APIServer-->>C-Store: [*] Uploaded file too large<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Status: 413<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: The image uploaded with too large size
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 3
+        User->>C-Store: User access to admin screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Header: { authorization }<br>Payload: { categoryId, productUnitId, name, price, description, quantityStock, images }
+        activate APIServer
+        APIServer->>Database: Query "Product" table by "name" attribute
+        activate Database
+        Database-->>APIServer: Found record
+        deactivate Database
+        APIServer-->>C-Store: [*] Entered "name" is already registered<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Status: 409<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: Name already registered
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 4
+        User->>C-Store: User access to admin screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Header: { authorization }<br>Payload: { categoryId, productUnitId, name, price, description, quantityStock, images }
+        activate APIServer
+        APIServer->>Database: Query "Product" table by "name" attribute
+        activate Database
+        Database-->>APIServer: Cannot found record
+        APIServer->>Database: Query "Category" table by "categoryId" attribute
+        Database-->>APIServer: Cannot found record
+        deactivate Database
+        APIServer-->>C-Store: [*] Entered "categoryId" is not registered<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Status: 400<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: Category is not registered
+        deactivate C-Store
+    end
+
+    rect rgba(255, 0, 0, 0.1)
+        note right of User: Failure Case 5
+        User->>C-Store: User access to admin screen
+        activate C-Store
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Header: { authorization }<br>Payload: { categoryId, productUnitId, name, price, description, quantityStock, images }
+        activate APIServer
+        APIServer->>Database: Query "Product" table by "name" attribute
+        activate Database
+        Database-->>APIServer: Cannot found record
+        APIServer->>Database: Query "Category" table by "categoryId" attribute
+        Database-->>APIServer: Found record
+        APIServer->>Database: Query "Product Unit" table by "productUnitId" attribute
+        Database-->>APIServer: Cannot found record
+        deactivate Database
+        APIServer-->>C-Store: [*] Entered "productUnitId" is not registered<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/products/<br>Status: 400<br>Payload: { errors }
+        deactivate APIServer
+        C-Store-->>User: Display Error Message<br>Message: Product Unit is not registered
+        deactivate C-Store
+    end

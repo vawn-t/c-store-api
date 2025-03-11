@@ -1,0 +1,56 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant API Server
+    participant Database
+
+    %% GET payment methods
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - GET payment methods
+        User->>C-Store: User access to payment method screen
+        activate C-Store
+        C-Store->>API Server: Request Method: GET<br>Endpoint: /api/v1/users/:userId/payment-methods/<br>Header: { authorization }<br>Payload: {}
+        activate API Server
+        API Server->>Database: Query "Payment Method" table
+        activate Database
+        Database-->>API Server: Return payment methods
+        deactivate Database
+        API Server-->>C-Store: [*] Get payment methods success<br>Response<br>Method: GET<br>Endpoint: /api/v1/users/:userId/payment-methods/<br>Status: 200<br>Payload: { paymentMethods }
+        deactivate API Server
+        C-Store-->>User: Render payment methods to screen
+        deactivate C-Store
+    end
+
+    %% CREATE payment method
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - CREATE payment method
+        User->>C-Store: User access to payment method screen
+        activate C-Store
+        C-Store->>API Server: Request Method: POST<br>Endpoint: /api/v1/users/:userId/payment-methods/<br>Header: { authorization }<br>Payload: { type }
+        activate API Server
+        API Server->>Database: Create new user's payment method with received value
+        activate Database
+        Database-->>API Server: Return payment method
+        deactivate Database
+        API Server-->>C-Store: [*] Create new payment method success<br>Response<br>Method: POST<br>Endpoint: /api/v1/users/:userId/payment-methods/<br>Status: 200<br>Payload: { id, type }
+        deactivate API Server
+        C-Store-->>User: Render payment method to screen
+        deactivate C-Store
+    end
+
+    %% DELETE payment method
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - DELETE payment method
+        User->>C-Store: User access to payment method screen
+        activate C-Store
+        C-Store->>API Server: Request Method: DELETE<br>Endpoint: /api/v1/users/:userId/payment-methods/:paymentMethodId/<br>Header: { authorization }<br>Payload: {}
+        activate API Server
+        API Server->>Database: Delete method in "Payment Method" table by "id" & "user_id" attribute
+        activate Database
+        Database-->>API Server: Response success
+        deactivate Database
+        API Server-->>C-Store: [*] Remove payment method success<br>Response<br>Method: DELETE<br>Endpoint: /api/v1/users/:userId/payment-methods/:paymentMethodId/<br>Status: 200<br>Payload: {}
+        deactivate API Server
+        C-Store-->>User: Render update to screen
+        deactivate C-Store
+    end

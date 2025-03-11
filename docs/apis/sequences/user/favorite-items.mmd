@@ -1,0 +1,92 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant API Server
+    participant Database
+
+    %% GET favorite items
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - GET favorite items
+        User->>C-Store: User access to home screen
+        activate C-Store
+        C-Store->>API Server: Request Method: GET<br>Endpoint: /api/v1/users/:userId/favorite-items/<br>Header: { authorization }<br>Payload: {}
+        activate API Server
+        API Server->>Database: Query "Favorite Item" table by "user_id" attribute
+        activate Database
+        Database-->>API Server: Return favorite items
+        deactivate Database
+        API Server-->>C-Store: [*] Get user's favorite items success<br>Response<br>Method: GET<br>Endpoint: /api/v1/users/:userId/favorite-items/<br>Status: 200<br>Payload: { favoriteItems }
+        deactivate API Server
+        C-Store-->>User: Render favorite items to screen
+        deactivate C-Store
+    end
+
+    %% CREATE favorite item - success
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - CREATE favorite item
+        User->>C-Store: User access to home screen
+        activate C-Store
+        C-Store->>API Server: Request Method: POST<br>Endpoint: /api/v1/users/:userId/favorite-items/<br>Header: { authorization }<br>Payload: { productId }
+        activate API Server
+        API Server->>Database: Query "Favorite Item" table by "user_id" & "product_id" attributes
+        activate Database
+        Database-->>API Server: Cannot found record
+        API Server->>Database: Create new favorite item with received "productId"
+        Database-->>API Server: Return favorite item
+        deactivate Database
+        API Server-->>C-Store: [*] Get user's favorite items success<br>Response<br>Method: POST<br>Endpoint: /api/v1/users/:userId/favorite-items/<br>Status: 200<br>Payload: { id, productId }
+        deactivate API Server
+        C-Store-->>User: Render update to screen
+        deactivate C-Store
+    end
+
+    %% CREATE favorite item - failure
+    rect rgb(255, 0, 0, 0.1)
+        Note right of User: Failure case 1 - CREATE favorite item (duplicate)
+        User->>C-Store: User access to home screen
+        activate C-Store
+        C-Store->>API Server: Request Method: POST<br>Endpoint: /api/v1/users/:userId/favorite-items/<br>Header: { authorization }<br>Payload: { productId }
+        activate API Server
+        API Server->>Database: Query "Favorite Item" table by "user_id" & "product_id" attributes
+        activate Database
+        Database-->>API Server: Found record
+        deactivate Database
+        API Server-->>C-Store: [*] User select product already existed<br>Response<br>Method: POST<br>Endpoint: /api/v1/users/:userId/favorite-items/<br>Status: 409<br>Payload: { errors }
+        deactivate API Server
+        C-Store-->>User: Render update to screen
+        deactivate C-Store
+    end
+
+    %% DELETE favorite item - success
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - DELETE favorite item
+        User->>C-Store: User access to home screen
+        activate C-Store
+        C-Store->>API Server: Request Method: DELETE<br>Endpoint: /api/v1/users/:userId/favorite-items/:favoriteItemId/<br>Header: { authorization }<br>Payload: {}
+        activate API Server
+        API Server->>Database: Delete user's favorite item in "Favorite Items" table by "id" attribute
+        activate Database
+        Database-->>API Server: Response success
+        deactivate Database
+        API Server-->>C-Store: [*] Delete user's favorite item success<br>Response<br>Method: DELETE<br>Endpoint: /api/v1/users/:userId/favorite-items/:favoriteItemId/<br>Status: 200<br>Payload: {}
+        deactivate API Server
+        C-Store-->>User: Remove favorite item on screen
+        deactivate C-Store
+    end
+
+    %% DELETE favorite item - failure
+    rect rgb(255, 0, 0, 0.1)
+        Note right of User: Failure case 1 - DELETE favorite item (not found)
+        User->>C-Store: User access to home screen
+        activate C-Store
+        C-Store->>API Server: Request Method: DELETE<br>Endpoint: /api/v1/users/:userId/favorite-items/:favoriteItemId/<br>Header: { authorization }<br>Payload: {}
+        activate API Server
+        API Server->>Database: Delete user's favorite item in "Favorite Items" table by "id" attribute
+        activate Database
+        Database-->>API Server: Response fail
+        deactivate Database
+        API Server-->>C-Store: [*] Delete user's favorite item success<br>Response<br>Method: DELETE<br>Endpoint: /api/v1/users/:userId/favorite-items/:favoriteItemId/<br>Status: 404<br>Payload: { errors }
+        deactivate API Server
+        C-Store-->>User: Render to update screen
+        deactivate C-Store
+    end

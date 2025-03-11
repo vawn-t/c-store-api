@@ -9,7 +9,7 @@ sequenceDiagram
         note right of User: Successful Case (Step 1: Sign Up Account)
         User->>C-Store: Enter Email & Password
         activate C-Store
-        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Payload: { email, password, phone }
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Payload: { email, password, phone }
         activate APIServer
         APIServer->>Database: Query "User" table by "email" attribute
         activate Database
@@ -40,7 +40,7 @@ sequenceDiagram
         note right of User: Failure Case 1
         User->>C-Store: Enter Email & Password
         activate C-Store
-        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Payload: { email, password, phone }
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Payload: { email, password, phone }
         activate APIServer
         APIServer->>Database: Query "User" table by received "email" attribute
         activate Database
@@ -56,7 +56,7 @@ sequenceDiagram
         note right of User: Failure Case 2
         User->>C-Store: Enter Email & Password
         activate C-Store
-        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Payload: { email, password, phone }
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/authentication/sign-up/<br>Payload: { email, password, phone }
         activate APIServer
         APIServer->>Database: Query "User" table by "email" attribute
         activate Database
@@ -74,7 +74,7 @@ sequenceDiagram
         note right of User: Successful Case (Step 2: Verify Phone Number)
         User->>C-Store: Enter OTP code
         activate C-Store
-        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/activate-account<br>Header: { authorization }<br>Payload: { otp }
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/authentication/activate-account<br>Header: { authorization }<br>Payload: { otp }
         activate APIServer
         APIServer->>OTPService: Request to verify entered OTP
         activate OTPService
@@ -90,7 +90,7 @@ sequenceDiagram
         note right of User: Failure Case
         User->>C-Store: Enter OTP code
         activate C-Store
-        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/authentication/activate-account<br>Header: { authorization }<br>Payload: { otp }
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/authentication/activate-account<br>Header: { authorization }<br>Payload: { otp }
         activate APIServer
         APIServer->>OTPService: Request to verify entered OTP
         activate OTPService

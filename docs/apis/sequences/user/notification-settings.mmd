@@ -1,0 +1,39 @@
+sequenceDiagram
+    actor User
+    participant C-Store
+    participant API Server
+    participant Database
+
+    %% GET notification settings
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - GET notification settings
+        User->>C-Store: User access to user's setting screen
+        activate C-Store
+        C-Store->>API Server: Request Method: GET<br>Endpoint: /api/v1/users/:userId/notification-settings/<br>Header: { authorization }<br>Payload: {}
+        activate API Server
+        API Server->>Database: Query "User Setting" table by "user_id" attribute
+        activate Database
+        Database-->>API Server: Return notification settings
+        deactivate Database
+        API Server-->>C-Store: [*] Get user's notification settings success<br>Response<br>Method: GET<br>Endpoint: /api/v1/users/:userId/notification-settings/<br>Status: 200<br>Payload: { enableEmailNotification, enableOrderNotification, enableGeneralNotification }
+        deactivate API Server
+        C-Store-->>User: Render notification settings to screen
+        deactivate C-Store
+    end
+
+    %% UPDATE notification settings
+    rect rgb(0, 128, 0, 0.1)
+        Note right of User: Successful case - UPDATE notification settings
+        User->>C-Store: User access to setting notifications screen
+        activate C-Store
+        C-Store->>API Server: Request Method: PATCH<br>Endpoint: /api/v1/users/:userId/notification-settings/<br>Header: { authorization }<br>Payload: { enableEmailNotification, enableOrderNotification, enableGeneralNotification }
+        activate API Server
+        API Server->>Database: Update user's notification settings with received value
+        activate Database
+        Database-->>API Server: Return notification settings
+        deactivate Database
+        API Server-->>C-Store: [*] Update user's notification settings success<br>Response<br>Method: PATCH<br>Endpoint: /api/v1/users/:userId/notification-settings/<br>Status: 200<br>Payload: { enableEmailNotification, enableOrderNotification, enableGeneralNotification }
+        deactivate API Server
+        C-Store-->>User: Render new notification settings to screen
+        deactivate C-Store
+    end

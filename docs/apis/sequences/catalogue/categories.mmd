@@ -9,7 +9,7 @@ sequenceDiagram
         note right of User: Successful Case (Home Screen)
         User->>C-Store: User access to home screen
         activate C-Store
-        C-Store->>APIServer: Request<br>Method: GET<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: {}
+        C-Store->>APIServer: Request Method: GET<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: {}
         activate APIServer
         APIServer->>Database: Query "Category" table joined with "Image" table<br>by "categoryId" attribute
         activate Database
@@ -25,7 +25,7 @@ sequenceDiagram
         note right of User: Successful Case (Admin Screen)
         User->>C-Store: User access to admin screen
         activate C-Store
-        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
         activate APIServer
         APIServer->>Database: Query "Category" table by "name" attribute
         activate Database
@@ -55,7 +55,7 @@ sequenceDiagram
         note right of User: Failure Case 1
         User->>C-Store: User access to admin screen
         activate C-Store
-        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
         activate APIServer
         APIServer->>Database: Query "Category" table by "name" attribute
         activate Database
@@ -71,7 +71,7 @@ sequenceDiagram
         note right of User: Failure Case 2
         User->>C-Store: User access to admin screen
         activate C-Store
-        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
         activate APIServer
         APIServer-->>C-Store: [*] Uploaded file with unsupported media type<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Status: 415<br>Payload: { errors }
         deactivate APIServer
@@ -83,7 +83,7 @@ sequenceDiagram
         note right of User: Failure Case 3
         User->>C-Store: User access to admin screen
         activate C-Store
-        C-Store->>APIServer: Request<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
+        C-Store->>APIServer: Request Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Header: { authorization }<br>Payload: { name, image }
         activate APIServer
         APIServer-->>C-Store: [*] Uploaded file too large<br>Response<br>Method: POST<br>Endpoint: /api/v1/catalogue/categories/<br>Status: 413<br>Payload: { errors }
         deactivate APIServer
