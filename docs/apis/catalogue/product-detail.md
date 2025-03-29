@@ -2,7 +2,7 @@
 
 ## Sequence Diagram
 
-![image info](./assets/product-detail.png)
+![image info](./assets/product-details.png)
 
 ---
 

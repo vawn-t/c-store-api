@@ -1,4 +1,4 @@
-# This is app flow of the c-store
+# This is app flow of the C-Store
 
 ![image](./assets/appflow.png)
 
