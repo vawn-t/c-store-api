@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # dev-api:
+  #   container_name: dev_api
+  #   build:
+  #     context: .
+  #     target: dev
+  #     dockerfile: ./Dockerfile
+  #   ports:
+  #     - 3000:3000
+  #   command: npm run start:debug
+  #   networks:
+  #     - dev-network
+  #   volumes:
+  #     - ./:/usr/src/app
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - dev-db
+  #   links:
+  #     - dev-db
+  #   env_file: .env
+
+  cstore-dev-db:
+    container_name: cstore_dev_db
+    image: postgres:16
+    ports:
+      - 5434:5432
+    environment:
+      - POSTGRES_USER=cstore
+      - POSTGRES_PASSWORD=cstoresecret
+      - POSTGRES_DB=cstore
+      - PG_DATA=/var/lib/postgresql/data
+    networks:
+      - cstore-network
+    volumes:
+      - postgres:/var/lib/postgrseql/data
+
+networks:
+  cstore-network:
+
+volumes:
+  postgres:
+    name: cstore-dev-db
