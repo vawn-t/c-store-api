@@ -3,13 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon --watch src --exec ts-node src/server.ts",
+    "dev": "cross-env NODE_ENV=development concurrently \"npx tsc --watch\" \"npx tsc-alias --watch\" \"npx pm2-dev dist/src/server.js\"",
     "start": "node dist/src/server.js",
-    "db:dev:migrate": "npx prisma migrate dev --name init",
-    "db:production:push": "npx prisma db push",
-    "db:production:migrate": "npx prisma migrate deploy",
     "docker:up": "docker compose up -d cstore-dev-db cstore-api",
-    "docker:down": "docker compose down"
+    "docker:down": "docker compose down",
+    "db:dev:migrate": "npx prisma migrate dev --name init",
+    "build": "cross-env NODE_ENV=production npx tsc-alias",
+    "db:production:push": "npx prisma db push",
+    "db:production:migrate": "npx prisma migrate deploy"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",
