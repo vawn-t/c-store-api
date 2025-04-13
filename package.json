@@ -5,10 +5,10 @@
   "scripts": {
     "start": "node ./bin/www",
     "db:dev:migrate": "npx prisma migrate dev --name init",
-    "db:dev:up": "docker compose up -d cstore-dev-db",
-    "db:dev:down": "docker compose down",
     "db:production:push": "npx prisma db push",
-    "db:production:migrate": "npx prisma migrate deploy"
+    "db:production:migrate": "npx prisma migrate deploy",
+    "docker:up": "docker compose up -d cstore-dev-db cstore-api",
+    "docker:down": "docker compose down"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",

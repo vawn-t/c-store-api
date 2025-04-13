@@ -1,25 +1,23 @@
 version: '3.8'
 
 services:
-  # dev-api:
-  #   container_name: dev_api
-  #   build:
-  #     context: .
-  #     target: dev
-  #     dockerfile: ./Dockerfile
-  #   ports:
-  #     - 3000:3000
-  #   command: npm run start:debug
-  #   networks:
-  #     - dev-network
-  #   volumes:
-  #     - ./:/usr/src/app
-  #   restart: unless-stopped
-  #   depends_on:
-  #     - dev-db
-  #   links:
-  #     - dev-db
-  #   env_file: .env
+  cstore-api:
+    container_name: c_store_api
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:3000
+    command: npm start
+    networks:
+      - cstore-network
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: unless-stopped
+    depends_on:
+      - cstore-dev-db
+    env_file: .env
 
   cstore-dev-db:
     container_name: cstore_dev_db
