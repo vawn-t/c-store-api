@@ -1,24 +1,6 @@
 version: '3.8'
 
 services:
-  cstore-api:
-    container_name: c_store_api
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    ports:
-      - 3000:3000
-    command: npm run start
-    networks:
-      - cstore-network
-    volumes:
-      - ./:/usr/src/app
-      - /usr/src/app/node_modules
-    restart: unless-stopped
-    depends_on:
-      - cstore-dev-db
-    env_file: .env
-
   cstore-dev-db:
     container_name: cstore_dev_db
     image: postgres:16
@@ -27,12 +9,32 @@ services:
     environment:
       - POSTGRES_USER=cstore
       - POSTGRES_PASSWORD=cstoresecret
-      - POSTGRES_DB=cstore
-      - PG_DATA=/var/lib/postgresql/data
+      - POSTGRES_DB=cstore_dev_db
     networks:
       - cstore-network
     volumes:
-      - postgres:/var/lib/postgrseql/data
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cstore']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  cstore-api:
+    container_name: cstore_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    depends_on:
+      cstore-dev-db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://cstore:cstoresecret@cstore-dev-db:5432/cstore_dev_db
+      - NODE_ENV=development
+    networks:
+      - cstore-network
 
 networks:
   cstore-network:
