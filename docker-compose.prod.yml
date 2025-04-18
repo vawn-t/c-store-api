@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  cstore-prod-db:
+    container_name: cstore_prod_db
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - PG_DATA=/var/lib/postgresql/data
+    ports:
+      - ${DB_PORT:-5432}:5432
+    volumes:
+      - postgres_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cstore-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+  cstore-api:
+    container_name: cstore_api_prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - ${API_PORT:-3000}:3000
+    restart: always
+    depends_on:
+      cstore-prod-db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - cstore-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+
+volumes:
+  postgres_prod:
+
+networks:
+  cstore-network:
+    driver: bridge

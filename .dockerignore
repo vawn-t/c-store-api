@@ -1,6 +1,33 @@
-node_modules
-npm-debug.log
-dist
-.env
+# Git
 .git
 .gitignore
+
+# Node.js
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Build output
+dist
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+logs
+*.log
+
+# OS files
+.DS_Store
+.idea
+.vscode
+*.swp
+*.swo
