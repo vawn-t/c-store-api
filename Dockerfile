@@ -7,12 +7,10 @@ FROM base as development
 ENV NODE_ENV=development
 RUN npm install
 COPY . .
-RUN npm run build
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npm run db:dev:migrate && npm run dev"]
 
 FROM base as production
 ENV NODE_ENV=production
 RUN npm ci --only=production
 COPY . .
-RUN npm run build
-CMD ["npm", "start"]
+CMD ["sh", "-c", "npm run db:production:migrate && npm start"]
