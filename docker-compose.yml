@@ -1,3 +1,4 @@
+# Need this file for shut the service down
 version: '3.8'
 
 services:
