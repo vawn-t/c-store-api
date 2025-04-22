@@ -15,7 +15,6 @@ CMD ["sh", "-c", "npm run db:dev:migrate && npm run dev"]
 
 # Build stage
 FROM base as build
-RUN npm install
 COPY . .
 RUN npx prisma generate && npm run build
 
@@ -28,10 +27,21 @@ ENV NODE_ENV=production
 COPY package*.json ./
 RUN npm install --omit=dev
 
-# Copy built files and required Prisma artifacts
-COPY --from=build /usr/src/app/dist ./dist
-COPY --from=build /usr/src/app/node_modules/.prisma ./node_modules/.prisma
-COPY prisma ./prisma
+# Production stage
+FROM node:20-alpine as production
+WORKDIR /usr/src/app
+ENV NODE_ENV=production
 
-# Start the application
-CMD ["sh", "-c", "npm run db:production:migrate && npm start"]
+# Install production dependencies only
+COPY package*.json ./
+RUN npm install --omit=dev
+
+# Copy built application from build stage
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/prisma ./prisma
+
+# Copy Prisma Client from build stage
+COPY --from=build /usr/src/app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build /usr/src/app/node_modules/@prisma ./node_modules/@prisma
+
+CMD ["node", "dist/server.js"]
