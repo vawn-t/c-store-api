@@ -11,7 +11,7 @@ FROM base as development
 ENV NODE_ENV=development
 RUN npm install
 COPY . .
-CMD ["sh", "-c", "npm run db:dev:migrate && npm run dev"]
+CMD ["sh", "-c", "npm run db:dev:migrate && npm run seed && npm run dev"]
 
 # Build stage
 FROM base as build
