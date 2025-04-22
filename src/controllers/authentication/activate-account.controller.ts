@@ -10,26 +10,26 @@ import { User } from '@prisma/client';
 import { activateAccountService } from 'src/services/authentication';
 
 const activateAccount = async (req: Request, res: Response) => {
-	try {
-		const errors = validationResult(req);
+  try {
+    const errors = validationResult(req);
 
-		if (!errors.isEmpty()) {
-			return res
-				.status(StatusCodes.BAD_REQUEST)
-				.json({ errors: errors.array() });
-		}
+    if (!errors.isEmpty()) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ errors: errors.array() });
+    }
 
-		const result = await activateAccountService.activateAccount({
-			otp: req.body.otp,
-			userId: (req.user as User).id
-		});
+    const result = await activateAccountService.activateAccount({
+      otp: req.body.otp,
+      userId: (req.user as User).id,
+    });
 
-		res.status(result.code).json(result.data);
-	} catch (error) {
-		res
-			.status(StatusCodes.INTERNAL_SERVER_ERROR)
-			.json({ msg: (error as Error).message });
-	}
+    res.status(result.code).json(result.data);
+  } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ msg: (error as Error).message });
+  }
 };
 
 const activateAccountController = { activateAccount };

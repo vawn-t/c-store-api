@@ -65,7 +65,7 @@ const signIn = async (params: ISignInParameter): Promise<ISignInReturn> => {
       data: {
         token: generateJWT(
           { secretOrKey: process.env.JWT_AUTHENTICATE_SECRET as string },
-          { userId: user.id },
+          { userId: user.id }
         ),
       },
     };

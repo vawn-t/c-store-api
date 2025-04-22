@@ -16,7 +16,7 @@ interface ICreateServiceReturn {
 }
 
 const resetPassword = async (
-  params: IResetPasswordParameter,
+  params: IResetPasswordParameter
 ): Promise<ICreateServiceReturn> => {
   await sendResetPassword(params.email, params.pwd);
 

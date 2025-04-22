@@ -29,8 +29,8 @@ const middlewarePassportStrategy = (passport: typeof Passport) => {
         } catch (error) {
           done(error);
         }
-      },
-    ),
+      }
+    )
   );
   // Config strategy for verify otp token
   passport.use(
@@ -54,8 +54,8 @@ const middlewarePassportStrategy = (passport: typeof Passport) => {
         } catch (error) {
           done(error);
         }
-      },
-    ),
+      }
+    )
   );
 };
 

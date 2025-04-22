@@ -35,7 +35,7 @@ interface IError {
 }
 
 export const signUp = async (
-  params: ISignUpParameter,
+  params: ISignUpParameter
 ): Promise<ICreateServiceReturn> => {
   const user = await prisma.user.findFirst({
     where: { email: params.email },
@@ -124,7 +124,7 @@ export const signUp = async (
       data: {
         token: generateJWT(
           { secretOrKey: process.env.JWT_AUTHENTICATE_OTP_SECRET as string },
-          { userId: newUser.id },
+          { userId: newUser.id }
         ),
       },
     };
